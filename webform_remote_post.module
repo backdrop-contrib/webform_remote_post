@@ -97,6 +97,7 @@ function webform_remote_post_menu() {
       4),
     'access callback' => 'user_access',
     'access arguments' => array('admin webform remote posts'),
+    'file' => 'includes/webform_remote_post.targets.inc',
     'type' => MENU_CALLBACK,
   );
   return $items;
