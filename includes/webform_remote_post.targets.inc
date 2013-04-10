@@ -91,7 +91,7 @@ function theme_webform_remote_post_targets_form($variables) {
   $form = $variables['form'];
   $webform_node = $form['#node'];
 
-  $header = array(t('Enabled'), t('Label'), t('Target URL'), t('Operations'));
+  $header = array(t('Enabled'), t('Label'), t('Target URL'), array('data' => t('Operations'), 'colspan' => 2));
   $rows = array();
 
   if (!empty($form['targets'])) {
@@ -101,18 +101,19 @@ function theme_webform_remote_post_targets_form($variables) {
         drupal_render($form['targets'][$tid]['status']),
         drupal_render($form['targets'][$tid]['label']),
         drupal_render($form['targets'][$tid]['url']),
+        l(t('Edit'), 'node/' . $webform_node->nid . '/webform/targets/' . $tid),
         l(t('Delete'), 'node/' . $webform_node->nid . '/webform/targets/' . $tid . '/delete'),
       );
     }
   }
   else {
-    $rows[] = array(array('data' => t('No remote target URLs specified yet. Add a target URL below.'), 'colspan' => 4));
+    $rows[] = array(array('data' => t('No remote target URLs specified yet. Add a target URL below.'), 'colspan' => 5));
   }
 
   // Add a row containing form elements for a new item.
   $row_data = array(
     array('colspan' => 3, 'data' => drupal_render($form['add'])),
-    array('colspan' => 1, 'data' => drupal_render($form['add_button'])),
+    array('colspan' => 2, 'data' => drupal_render($form['add_button'])),
   );
   $rows[] = array('data' => $row_data, 'class' => array('webform-remote-post-add-target-form'));
 

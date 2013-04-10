@@ -73,7 +73,20 @@ function webform_remote_post_menu() {
     'weight' => 1,
     'type' => MENU_LOCAL_TASK,
   );
-
+  // Edit a target.
+  // @todo: Use target auto-loader rather than just passing its ID.
+  $items['node/%webform_menu/webform/targets/%'] = array(
+    'title' => 'Edit remote post settings',
+    'load arguments' => array(1),
+    'page arguments' => array(
+      'webform_remote_post_target_edit_form',
+      1,
+      4),
+    'access callback' => 'user_access',
+    'access arguments' => array('admin webform remote posts'),
+    'file' => 'includes/webform_remote_post.target.inc',
+    'type' => MENU_CALLBACK,
+  );
   // Delete a target.
   $items['node/%webform_menu/webform/targets/%/delete'] = array(
     'title' => 'Delete repost target',
