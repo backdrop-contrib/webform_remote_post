@@ -119,7 +119,7 @@ function webform_remote_post_webform_submission_insert($node, $submission) {
     ->fetchAllAssoc('tid', PDO::FETCH_ASSOC);
 
   // Create a map with webform component ID's and the component themselves,
-  // handly later on.
+  // handy later on.
   $component_map = array();
   foreach ($node->webform['components'] as $component) {
     $component_map[$component['cid']] = $component;
