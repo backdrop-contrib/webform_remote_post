@@ -44,6 +44,9 @@ function webform_remote_post_targets_form($form, &$form_state, $webform_node) {
     $form['targets'][$tid]['url'] = array(
       '#markup' => check_plain($data['url']),
     );
+   $form['targets'][$tid]['type'] = array(
+      '#markup' => check_plain($data['type']),
+    );
   }
 
   // Form elements for a new remote post target. Actually rendered by
@@ -65,7 +68,17 @@ function webform_remote_post_targets_form($form, &$form_state, $webform_node) {
     '#maxlength' => 500,
     '#required' => TRUE,
   );
-
+  $form['add']['type'] = array(
+    '#type' => 'select',
+    '#title' => t('Post type'),
+    '#options' => array(
+       'x-www-form-urlencoded' => t('x-www-form-urlencoded'),
+       'json' => t('JSON'),
+    ),
+    '#default_value' => 'x-www-form-urlencoded',
+    '#description' => t('Set this the type of data you want to post.'),
+    '#required' => TRUE,
+  );
   $form['add_button'] = array(
     '#type' => 'submit',
     '#value' => t('Add'),
@@ -90,8 +103,7 @@ function webform_remote_post_targets_form($form, &$form_state, $webform_node) {
 function theme_webform_remote_post_targets_form($variables) {
   $form = $variables['form'];
   $webform_node = $form['#node'];
-
-  $header = array(t('Enabled'), t('Label'), t('Target URL'), t('Operations'));
+  $header = array(t('Enabled'), t('Label'), t('Target URL'), t('Post Type'), t('Operations'));
   $rows = array();
 
   if (!empty($form['targets'])) {
@@ -101,6 +113,7 @@ function theme_webform_remote_post_targets_form($variables) {
         drupal_render($form['targets'][$tid]['status']),
         drupal_render($form['targets'][$tid]['label']),
         drupal_render($form['targets'][$tid]['url']),
+        drupal_render($form['targets'][$tid]['type']),
         l(t('Delete'), 'node/' . $webform_node->nid . '/webform/targets/' . $tid . '/delete'),
       );
     }
@@ -146,6 +159,7 @@ function webform_remote_post_targets_form_submit($form, &$form_state) {
 
   $target['url'] = trim($form_state['values']['add']['url']);
   $target['nid'] = trim($form_state['values']['nid']);
+  $target['type'] = trim($form_state['values']['add']['type']);
 
   // TODO: Like in webform, this is not race-condition safe.
   // Switch to using transactions as well?
