@@ -12,7 +12,7 @@
  * @param array $webform_node An array representing a webform node.
  * @param integer $target_id The ID of the post target.
  */
-function webform_remote_post_target_edit_form($form, &$form_state, $webform_node, $target_id){
+function webform_remote_post_target_edit_form($form, &$form_state, $webform_node, $target = array()){
   $form['#tree'] = TRUE;
   $form['#node'] = $webform_node;
 
@@ -31,6 +31,7 @@ function webform_remote_post_target_edit_form($form, &$form_state, $webform_node
     '#size' => 20,
     '#maxlength' => 60,
     '#required' => FALSE,
+    '#value' => $target['label'],
   );
 
   $form['edit']['url'] = array(
@@ -40,6 +41,7 @@ function webform_remote_post_target_edit_form($form, &$form_state, $webform_node
     '#size' => 100,
     '#maxlength' => 500,
     '#required' => TRUE,
+    '#value' => $target['url'],
   );
 
   // Add the submit button.
@@ -64,4 +66,33 @@ function theme_webform_remote_post_target_edit_form($variables) {
   $form = $variables['form'];
   $children = element_children($form, TRUE);
   return drupal_render_children($form, $children);
+}
+
+/**
+ * Submit handler for webform_remote_post_forwards_form().
+*/
+function webform_remote_post_target_edit_form_submit($form, &$form_state) {
+  $target = array();
+  if (!empty($form_state['values']['edit']['label'])) {
+    $target['label'] = trim($form_state['values']['edit']['label']);
+  }
+
+  $target['url'] = trim($form_state['values']['edit']['url']);
+  $target['nid'] = trim($form_state['values']['nid']);
+
+  // TODO: Like in webform, this is not race-condition safe.
+  // Switch to using transactions as well?
+  $next_id_query = db_select('webform_remote_post_targets')->condition('nid', $target['nid']);
+  $next_id_query->addExpression('MAX(tid) + 1', 'tid');
+  $target['tid'] = $next_id_query->execute()->fetchField();
+  if ($target['tid'] == NULL) {
+    $target['tid'] = 1;
+  }
+
+  $success = drupal_write_record('webform_remote_post_targets', $target);
+
+  // Write a log if we weren't able to save the target successfully.
+  if ($success === FALSE) {
+    watchdog('webform_remote_post', 'There was an error writing a new remote post target to the database.', array(), WATCHDOG_ERROR);
+  }
 }

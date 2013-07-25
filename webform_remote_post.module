@@ -73,15 +73,12 @@ function webform_remote_post_menu() {
     'weight' => 1,
     'type' => MENU_LOCAL_TASK,
   );
-  // Edit a target.
-  // @todo: Use target auto-loader rather than just passing its ID.
-  $items['node/%webform_menu/webform/targets/%'] = array(
+  // Edit or create a target.
+  $items['node/%webform_menu/webform/targets/%webform_remote_post_menu_target'] = array(
     'title' => 'Edit remote post settings',
     'load arguments' => array(1),
     'page arguments' => array(
-      'webform_remote_post_target_edit_form',
-      1,
-      4),
+      'webform_remote_post_target_edit_form', 1, 4),
     'access callback' => 'user_access',
     'access arguments' => array('admin webform remote posts'),
     'file' => 'includes/webform_remote_post.target.inc',
@@ -92,9 +89,7 @@ function webform_remote_post_menu() {
     'title' => 'Delete repost target',
     'load arguments' => array(1),
     'page arguments' => array(
-      'webform_remote_post_target_delete_form_submit',
-      1,
-      4),
+      'webform_remote_post_target_delete_form_submit', 1, 4),
     'access callback' => 'user_access',
     'access arguments' => array('admin webform remote posts'),
     'file' => 'includes/webform_remote_post.targets.inc',
@@ -210,3 +205,21 @@ function webform_remote_post_theme($existing, $type, $theme, $path) {
   );
   return $theme;
 };
+
+/**
+ * Menu loader callback. Load a remote post target if the given tid is a valid.
+ */
+function webform_remote_post_menu_target_load($tid, $nid) {
+  if ($tid == 'new') {
+    if (isset($_GET['label']) && isset($_GET['url'])) {
+      $target['label'] = $_GET['label'];
+      $target['url'] = $_GET['url'];
+    }
+  } else {
+    module_load_include('inc', 'webform_remote_post', 'includes/webform_remote_post.targets');
+    $target = webform_remote_post_target_load($tid, $nid);
+  }
+  watchdog('webform_remote_post',"The target id to load is $tid");
+  watchdog('webform_remote_post','The auto-loaded target is ' . print_r($target, true));
+  return $target;
+}

@@ -140,29 +140,36 @@ function webform_remote_post_target_validate($form, &$form_state) {
  * Submit handler for webform_remote_post_forwards_form().
  */
 function webform_remote_post_targets_form_submit($form, &$form_state) {
-  $target = array();
-  if (!empty($form_state['values']['add']['label'])) {
-    $target['label'] = trim($form_state['values']['add']['label']);
-  }
+  // We are creating a new post target. Lets pass the data to the
+  // individual remote post target edit settings form.
+  $form_state['redirect'] = array('node/' . $form['#node']->nid . '/webform/targets/new', array('query' => array('url' => $form_state['values']['add']['url'], 'label' => $form_state['values']['add']['label'])));
 
-  $target['url'] = trim($form_state['values']['add']['url']);
-  $target['nid'] = trim($form_state['values']['nid']);
-
-  // TODO: Like in webform, this is not race-condition safe.
-  // Switch to using transactions as well?
-  $next_id_query = db_select('webform_remote_post_targets')->condition('nid', $target['nid']);
-  $next_id_query->addExpression('MAX(tid) + 1', 'tid');
-  $target['tid'] = $next_id_query->execute()->fetchField();
-  if ($target['tid'] == NULL) {
-    $target['tid'] = 1;
-  }
-
-  $success = drupal_write_record('webform_remote_post_targets', $target);
-
-  // Write a log if we weren't able to save the target successfully.
-  if ($success === FALSE) {
-    watchdog('webform_remote_post', 'There was an error writing a new remote post target to the database.', array(), WATCHDOG_ERROR);
-  }
+/* TODO: Move all the code below to webform_remote_post.target.inc into a
+ *       webform_remote_post_target_edit_form_submit() method.
+ */
+//  $target = array();
+//  if (!empty($form_state['values']['add']['label'])) {
+//    $target['label'] = trim($form_state['values']['add']['label']);
+//  }
+//
+//  $target['url'] = trim($form_state['values']['add']['url']);
+//  $target['nid'] = trim($form_state['values']['nid']);
+//
+//  // TODO: Like in webform, this is not race-condition safe.
+//  // Switch to using transactions as well?
+//  $next_id_query = db_select('webform_remote_post_targets')->condition('nid', $target['nid']);
+//  $next_id_query->addExpression('MAX(tid) + 1', 'tid');
+//  $target['tid'] = $next_id_query->execute()->fetchField();
+//  if ($target['tid'] == NULL) {
+//    $target['tid'] = 1;
+//  }
+//
+//  $success = drupal_write_record('webform_remote_post_targets', $target);
+//
+//  // Write a log if we weren't able to save the target successfully.
+//  if ($success === FALSE) {
+//    watchdog('webform_remote_post', 'There was an error writing a new remote post target to the database.', array(), WATCHDOG_ERROR);
+//  }
 }
 
 /**
@@ -207,4 +214,26 @@ function webform_remote_post_update_enabled_flag($form, $form_state) {
     ->execute();
 
   return $form['targets'][$target_id]['status'];
+}
+
+/**
+ * Load a remote target setting from the database or initialize a new remote target.
+ */
+function webform_remote_post_target_load($tid, $nid) {
+//  $node = node_load($nid);
+  if ($tid == 'new') {
+    $target = array(
+      'label' => '',
+      'url' => '',
+    );
+  } else {
+    $target = db_select('webform_remote_post_targets')
+      ->fields('webform_remote_post_targets')
+      ->condition('nid', $nid)
+      ->condition('tid', $tid)
+      ->execute()
+      ->fetchAssoc('tid', PDO::FETCH_ASSOC);
+  }
+
+  return $target;
 }
