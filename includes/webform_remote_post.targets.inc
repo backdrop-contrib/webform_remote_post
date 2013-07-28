@@ -70,13 +70,13 @@ function webform_remote_post_targets_form($form, &$form_state, $webform_node) {
   );
   $form['add']['type'] = array(
     '#type' => 'select',
-    '#title' => t('Post type'),
+    '#title' => t('Post Type'),
     '#options' => array(
        'x-www-form-urlencoded' => t('x-www-form-urlencoded'),
        'json' => t('JSON'),
     ),
     '#default_value' => 'x-www-form-urlencoded',
-    '#description' => t('Set this the type of data you want to post.'),
+    '#description' => t('Use x-www-form-urlencoded if unsure, as it is the default format for HTML forms. You also have the option to post data in <a href="http://www.json.org/" target="_blank">JSON</a> format.'),
     '#required' => TRUE,
   );
   $form['add_button'] = array(
@@ -119,12 +119,12 @@ function theme_webform_remote_post_targets_form($variables) {
     }
   }
   else {
-    $rows[] = array(array('data' => t('No remote target URLs specified yet. Add a target URL below.'), 'colspan' => 4));
+    $rows[] = array(array('data' => t('No remote target URLs specified yet. Add a target URL below.'), 'colspan' => 5));
   }
 
   // Add a row containing form elements for a new item.
   $row_data = array(
-    array('colspan' => 3, 'data' => drupal_render($form['add'])),
+    array('colspan' => 4, 'data' => drupal_render($form['add'])),
     array('colspan' => 1, 'data' => drupal_render($form['add_button'])),
   );
   $rows[] = array('data' => $row_data, 'class' => array('webform-remote-post-add-target-form'));
