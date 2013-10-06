@@ -227,15 +227,8 @@ function webform_remote_post_theme($existing, $type, $theme, $path) {
  * Menu loader callback. Load a remote post target if the given tid is a valid.
  */
 function webform_remote_post_menu_target_load($tid, $nid) {
-  if ($tid == 'new') {
-    if (isset($_GET['label']) && isset($_GET['url'])) {
-      $target['label'] = $_GET['label'];
-      $target['url'] = $_GET['url'];
-    }
-  } else {
-    module_load_include('inc', 'webform_remote_post', 'includes/webform_remote_post.targets');
-    $target = webform_remote_post_target_load($tid, $nid);
-  }
+  module_load_include('inc', 'webform_remote_post', 'includes/webform_remote_post.targets');
+  $target = webform_remote_post_target_load($tid, $nid);
   watchdog('webform_remote_post',"The target id to load is $tid");
   watchdog('webform_remote_post','The auto-loaded target is ' . print_r($target, true));
   return $target;

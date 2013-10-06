@@ -68,17 +68,17 @@ function webform_remote_post_targets_form($form, &$form_state, $webform_node) {
     '#maxlength' => 500,
     '#required' => TRUE,
   );
-  $form['add']['type'] = array(
-    '#type' => 'select',
-    '#title' => t('Post Type'),
-    '#options' => array(
-       'x-www-form-urlencoded' => t('x-www-form-urlencoded'),
-       'json' => t('JSON'),
-    ),
-    '#default_value' => 'x-www-form-urlencoded',
-    '#description' => t('Use x-www-form-urlencoded if unsure, as it is the default format for HTML forms. You also have the option to post data in <a href="http://www.json.org/" target="_blank">JSON</a> format.'),
-    '#required' => TRUE,
-  );
+//  $form['add']['type'] = array(
+//    '#type' => 'select',
+//    '#title' => t('Post Type'),
+//    '#options' => array(
+//       'x-www-form-urlencoded' => t('x-www-form-urlencoded'),
+//       'json' => t('JSON'),
+//    ),
+//    '#default_value' => 'x-www-form-urlencoded',
+//    '#description' => t('Use x-www-form-urlencoded if unsure, as it is the default format for HTML forms. You also have the option to post data in <a href="http://www.json.org/" target="_blank">JSON</a> format.'),
+//    '#required' => TRUE,
+//  );
   $form['add_button'] = array(
     '#type' => 'submit',
     '#value' => t('Add'),
@@ -103,7 +103,7 @@ function webform_remote_post_targets_form($form, &$form_state, $webform_node) {
 function theme_webform_remote_post_targets_form($variables) {
   $form = $variables['form'];
   $webform_node = $form['#node'];
-  $header = array(t('Enabled'), t('Label'), t('Target URL'), t('Post Type'), t('Operations'));
+  $header = array(t('Enabled'), t('Label'), t('Target URL'), t('Post Type'), array('data' => t('Operations'), 'colspan' => 2));
   $rows = array();
 
   if (!empty($form['targets'])) {
@@ -120,12 +120,12 @@ function theme_webform_remote_post_targets_form($variables) {
     }
   }
   else {
-    $rows[] = array(array('data' => t('No remote target URLs specified yet. Add a target URL below.'), 'colspan' => 5));
+    $rows[] = array(array('data' => t('No remote target URLs specified yet. Add a target URL below.'), 'colspan' => 6));
   }
 
   // Add a row containing form elements for a new item.
   $row_data = array(
-    array('colspan' => 4, 'data' => drupal_render($form['add'])),
+    array('colspan' => 5, 'data' => drupal_render($form['add'])),
     array('colspan' => 1, 'data' => drupal_render($form['add_button'])),
   );
   $rows[] = array('data' => $row_data, 'class' => array('webform-remote-post-add-target-form'));
@@ -158,51 +158,6 @@ function webform_remote_post_targets_form_submit($form, &$form_state) {
   // fields are shown here. All advanced settings happen in the individual
   // remote post target settings form.
   $form_state['redirect'] = array('node/' . $form['#node']->nid . '/webform/targets/new', array('query' => array('url' => $form_state['values']['add']['url'], 'label' => $form_state['values']['add']['label'])));
-/*  $target = array();
-  if (!empty($form_state['values']['add']['label'])) {
-    $target['label'] = trim($form_state['values']['add']['label']);
-  }
-
-  $target['url'] = trim($form_state['values']['add']['url']);
-  $target['nid'] = trim($form_state['values']['nid']);
-  $target['type'] = trim($form_state['values']['add']['type']);
-
-  // TODO: Like in webform, this is not race-condition safe.
-  // Switch to using transactions as well?
-  $next_id_query = db_select('webform_remote_post_targets')->condition('nid', $target['nid']);
-  $next_id_query->addExpression('MAX(tid) + 1', 'tid');
-  $target['tid'] = $next_id_query->execute()->fetchField();
-  if ($target['tid'] == NULL) {
-    $target['tid'] = 1;
-  }
-*/
-
-/* TODO: Move all the code below to webform_remote_post.target.inc into a
- *       webform_remote_post_target_edit_form_submit() method.
- */
-//  $target = array();
-//  if (!empty($form_state['values']['add']['label'])) {
-//    $target['label'] = trim($form_state['values']['add']['label']);
-//  }
-//
-//  $target['url'] = trim($form_state['values']['add']['url']);
-//  $target['nid'] = trim($form_state['values']['nid']);
-//
-//  // TODO: Like in webform, this is not race-condition safe.
-//  // Switch to using transactions as well?
-//  $next_id_query = db_select('webform_remote_post_targets')->condition('nid', $target['nid']);
-//  $next_id_query->addExpression('MAX(tid) + 1', 'tid');
-//  $target['tid'] = $next_id_query->execute()->fetchField();
-//  if ($target['tid'] == NULL) {
-//    $target['tid'] = 1;
-//  }
-//
-//  $success = drupal_write_record('webform_remote_post_targets', $target);
-//
-//  // Write a log if we weren't able to save the target successfully.
-//  if ($success === FALSE) {
-//    watchdog('webform_remote_post', 'There was an error writing a new remote post target to the database.', array(), WATCHDOG_ERROR);
-//  }
 }
 
 /**
@@ -253,20 +208,21 @@ function webform_remote_post_update_enabled_flag($form, $form_state) {
  * Load a remote target setting from the database or initialize a new remote target.
  */
 function webform_remote_post_target_load($tid, $nid) {
-//  $node = node_load($nid);
+
   if ($tid == 'new') {
-    $target = array(
-      'label' => '',
-      'url' => '',
-    );
+    $target = array();
+    if (isset($_GET['label']) && isset($_GET['url'])) {
+      $target['label'] = $_GET['label'];
+      $target['url']   = $_GET['url'];
+    }
   } else {
     $target = db_select('webform_remote_post_targets')
-      ->fields('webform_remote_post_targets')
+      ->fields('webform_remote_post_targets', array('nid', 'tid', 'url', 'label', 'enabled', 'type'))
       ->condition('nid', $nid)
       ->condition('tid', $tid)
       ->execute()
       ->fetchAssoc('tid', PDO::FETCH_ASSOC);
   }
-
+  #drupal_set_message(print_r($target, true));
   return $target;
 }
