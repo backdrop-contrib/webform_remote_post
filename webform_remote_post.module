@@ -162,7 +162,7 @@ function webform_remote_post_webform_submission_insert($node, $submission) {
     }
     else {
       // URL-encode the payload.
-      $post_data = http_build_query($payload);
+      $post_data = drupal_http_build_query($payload);
     
       // Repost data to each target. Begin by setting the
       // options for drupal_http_request().
