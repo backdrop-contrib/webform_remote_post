@@ -39,7 +39,7 @@ function webform_remote_post_help($path, $arg) {
                              Salesforce, you can use this module to push
                              submissions using the web-to-lead mechanism to
                              create a Lead from every Webform submission in
-                             your Drupal site.') . '</li>';
+                             your Backdrop site.') . '</li>';
       $output .= '<li>' . t('Eloqua Integration &ndash; Create lead forms
                              to be submitted to Eloqua. Add the hidden fields
                              as indicated in Eloqua and it\'s ready to go.') . '</li>';
@@ -65,7 +65,7 @@ function webform_remote_post_menu() {
   // auto-loads a webform node.
   $items['node/%webform_menu/webform/targets'] = array(
     'title' => 'Remote Posts',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('webform_remote_post_targets_form', 1),
     'access callback' => 'user_access',
     'access arguments' => array('admin webform remote posts'),
@@ -73,26 +73,17 @@ function webform_remote_post_menu() {
     'weight' => 1,
     'type' => MENU_LOCAL_TASK,
   );
-  // Edit or create a target.
-  $items['node/%webform_menu/webform/targets/%webform_remote_post_menu_target'] = array(
-    'title' => 'Edit remote post settings',
-    'load arguments' => array(1),
-    'page arguments' => array(
-      'webform_remote_post_target_edit_form', 1, 4),
-    'access callback' => 'user_access',
-    'access arguments' => array('admin webform remote posts'),
-    'file' => 'includes/webform_remote_post.target.inc',
-    'type' => MENU_CALLBACK,
-  );
+
   // Delete a target.
   $items['node/%webform_menu/webform/targets/%/delete'] = array(
     'title' => 'Delete repost target',
     'load arguments' => array(1),
     'page arguments' => array(
-      'webform_remote_post_target_delete_form_submit', 1, 4),
+      'webform_remote_post_target_delete_form_submit',
+      1,
+      4),
     'access callback' => 'user_access',
     'access arguments' => array('admin webform remote posts'),
-    'file' => 'includes/webform_remote_post.targets.inc',
     'type' => MENU_CALLBACK,
   );
   return $items;
@@ -138,7 +129,7 @@ function webform_remote_post_webform_submission_insert($node, $submission) {
   // array of form field names and the data.
   $payload = array();
   foreach ($submission->data as $cid => $component_data) {
-    $payload[$component_map[$cid]['form_key']] = implode(', ', $component_data);
+    $payload[$component_map[$cid]['form_key']] = implode(', ', $component_data['value']);
   }
 
   // Acceptable server response codes.
@@ -152,8 +143,8 @@ function webform_remote_post_webform_submission_insert($node, $submission) {
       $post_data = json_encode($payload);
     
       // Repost data to each target. Begin by setting the
-      // options for drupal_http_request().
-      $drupal_http_request_options = array(
+      // options for backdrop_http_request().
+      $backdrop_http_request_options = array(
         'method' => 'POST',
         'data' => $post_data,
         'timeout' => 15,
@@ -162,11 +153,11 @@ function webform_remote_post_webform_submission_insert($node, $submission) {
     }
     else {
       // URL-encode the payload.
-      $post_data = drupal_http_build_query($payload);
+      $post_data = http_build_query($payload);
     
       // Repost data to each target. Begin by setting the
-      // options for drupal_http_request().
-      $drupal_http_request_options = array(
+      // options for backdrop_http_request().
+      $backdrop_http_request_options = array(
         'method' => 'POST',
         'data' => $post_data,
         'timeout' => 15,
@@ -175,7 +166,7 @@ function webform_remote_post_webform_submission_insert($node, $submission) {
     }
 
     // Where the magic happens:
-    $request = drupal_http_request($target['url'], $drupal_http_request_options);
+    $request = backdrop_http_request($target['url'], $backdrop_http_request_options);
     // Log any errors.
     if (isset($request->code) && !in_array($request->code, $benign_reponse_codes)) {
       $log_msg = 'A remote (%type) post to %url by webform node ID %id returned a ';
@@ -222,14 +213,3 @@ function webform_remote_post_theme($existing, $type, $theme, $path) {
   );
   return $theme;
 };
-
-/**
- * Menu loader callback. Load a remote post target if the given tid is a valid.
- */
-function webform_remote_post_menu_target_load($tid, $nid) {
-  module_load_include('inc', 'webform_remote_post', 'includes/webform_remote_post.targets');
-  $target = webform_remote_post_target_load($tid, $nid);
-  watchdog('webform_remote_post',"The target id to load is $tid");
-  watchdog('webform_remote_post','The auto-loaded target is ' . print_r($target, true));
-  return $target;
-}
