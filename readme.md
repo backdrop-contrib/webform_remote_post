@@ -1,15 +1,20 @@
 WEBFORM REMOTE POST
-===========
+===================
 
 CONTENTS OF THIS FILE
 ---------------------
 
  - Introduction
+ - Tested
+ - Known Issues
+ - Special Thanks
  - Requirements
  - Installation
- - Permissions
+ - Coming From Drupal?
  - Usage
- - Sponsors
+ - License
+ - Credits
+ - Maintainers
 
 INTRODUCTION
 ------------
@@ -27,23 +32,33 @@ Re-posting to any 3rd party system – This module is general purpose. You need 
 TESTED
 -----
 
-@todo
-This module has NOT BEEN TESTED and is being ported to Backdrop.  It may work.
+This module does not break anything and saves settings when installed to Backdrop 1.0 but testing of the specific functionality needs to be tested -- for example, posting to a live Salesforce account.
 
 KNOWN ISSUES
 ---------------------
+
 @todo
 
+SPECIAL THANKS
+--------------
+
+Enrique Delgado <https://www.drupal.org/u/enrique.delgado>
 
 REQUIREMENTS
 ------------
 
-@todo
+- Webform module
 
 INSTALLATION
 ------------
 
-@todo
+Install this module using the official Backdrop CMS instructions at https://backdropcms.org/guide/modules
+
+
+COMING FROM DRUPAL?
+-------------------
+
+Nothing substantially different.
 
 PERMISSIONS
 ------------
@@ -53,24 +68,25 @@ PERMISSIONS
 
 USAGE
 -----
-@todo
 
 
-License
+LICENSE
 -------
 
-This project is GPL v2 software. See the LICENSE.txt file in this directory for
-complete text.
+This project is GPL v2 software. See the LICENSE.txt file in this directory for complete text.
 
-Maintainers
+CREDITS
+-----------
+
+This module is based on the Webform Remote Post module for Drupal, originally written and maintained by a large number of contributors, including:
+
+- Enrique Delgado <https://www.drupal.org/u/enrique.delgado>
+
+MAINTAINERS
 -----------
 
 - seeking
 
-Current Maintainers on Drupal:
-
-Enrique Delgado <https://www.drupal.org/u/enrique.delgado>
-
 Ported to Backdrop by:
 
- - biolithic <https://github.com/biolithic>
+- biolithic <https://github.com/biolithic>
