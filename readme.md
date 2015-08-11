@@ -32,7 +32,7 @@ Re-posting to any 3rd party system – This module is general purpose. You need 
 TESTED
 -----
 
-This module does not break anything and saves settings when installed to Backdrop 1.0 but testing of the specific functionality needs to be tested -- for example, posting to a live Salesforce account.
+This module does not break anything and saves settings when installed to Backdrop 1.1 but testing of the specific functionality needs to be tested -- for example, posting to a live Salesforce account in a production environment.
 
 KNOWN ISSUES
 ---------------------
@@ -68,6 +68,8 @@ PERMISSIONS
 
 USAGE
 -----
+
+This module installs a tab on the Webform edit screen.
 
 
 LICENSE
